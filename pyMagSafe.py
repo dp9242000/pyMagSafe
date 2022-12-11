@@ -53,7 +53,7 @@ else:
             print(files)  # printing file name of desired extension
             with open(files) as f:
                 line = f.read()
-                magnets.append((files, line))
+                magnets.append((os.path.basename(files), line))
                 os.remove(files)
 
     # save magnets with timestamp as key

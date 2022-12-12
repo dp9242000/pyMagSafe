@@ -1,92 +1,83 @@
 #! python3
 # pyMagSafeGui.py
 
-from PySide6.QtWidgets import (QApplication, QMainWindow, QWidget, QPushButton,
-                               QVBoxLayout, QFileDialog, QListWidget)
 import os
 import shelve
-import sys
 from datetime import datetime
 import subprocess
+from pathlib import Path
 
-
-folderName = os.path.join('.','outFiles')
-os.makedirs(folderName, exist_ok = True)
-magnets = []
-# giving file extension
-ext = '.magnet'
+folderName = os.path.join('.', 'outFiles')
+os.makedirs(folderName, exist_ok=True)
 
 # open shelf file to save and read magnets
 shelfFilePath = os.path.join(folderName, 'pyMagSafe')
-shelfFile = shelve.open(shelfFilePath)
+
+CONFIG_KEY = "config"
 
 
-class MainWindow(QMainWindow):
-    def __init__(self):
-        super(MainWindow, self).__init__()
-        self.setWindowTitle("pyMagSafe")
+def read_config():
+    with shelve.open(shelfFilePath) as shelfFile:
+        config = shelfFile.get(CONFIG_KEY, {})
+        return config
 
-        self.button = QPushButton("Send to Deluge")
-        self.button.clicked.connect(self.go_button_clicked)
-        self.fname = QListWidget()
-        self.dlgButton = QPushButton("Select File(s)...")
-        self.dlgButton.clicked.connect(self.dlg_button_clicked)
-
-        layout = QVBoxLayout()
-        layout.addWidget(self.fname)
-        layout.addWidget(self.dlgButton)
-        layout.addWidget(self.button)
-
-        window = QWidget()
-        window.setLayout(layout)
-
-        # add button as widget
-        self.setCentralWidget(window)
-
-    def go_button_clicked(self):
-        items = []
-        for i in range(self.fname.count()):
-            items.append(str(self.fname.item(i).text()))
-        sendToDeluge(items)
-        self.fname.clear()
-
-    def dlg_button_clicked(self):
-        filter = "magnet(*.magnet)"
-        file = QFileDialog.getOpenFileNames(self, filter=filter)
-        self.fname.addItems(file[0])
-        # self.dlg.setFilter(".magnet files (*.magnet)")
+def save_config(key, value):
+    with shelve.open(shelfFilePath) as shelfFile:
+        config = shelfFile.get(CONFIG_KEY, {})
+        config[key] = value
+        shelfFile[CONFIG_KEY] = config
 
 
-# open all .magnet files in deluge
-def sendToDeluge(file_list):
+def read_hist():
+    history = {}
+    with shelve.open(shelfFilePath) as shelfFile:
+        hist_keys = shelfFile.keys()
+        for item in hist_keys:
+            if item != CONFIG_KEY:
+                ts = datetime.fromtimestamp(float(item))
+                dt = ts.strftime("%Y-%m-%d %H:%M:%S")
+                history[dt] = shelfFile.get(item)
+    # # user entered "-l" to request list of keys/timestamps
+    # elif sys.argv[1] == "-l":
+    #     keys = list(shelfFile.keys())
+    #     keys.sort()
+    #     max = len(max(keys, key=len))
+    #     for item in keys:
+    #         timestamp = float(item)
+    #         datetime = datetime.fromtimestamp(timestamp)
+    #         print(f'{item :<{max}} : {datetime}')
+    # # user entered a time stamp to request previous magnets
+    # elif sys.argv[1] in list(shelfFile.keys()):
+    #     for item in list(shelfFile.get(sys.argv[1])):
+    #         print(f"{item[0]} :\n{item[1]}")
+    #         print()
+    return history
+
+def read_magnets(file_list):
+    magnets = []
+    # iterating over all files
+    for file in file_list:
+        if file.endswith(".magnet") and os.path.exists(file):
+            # print(file)  # print file name
+            with open(file) as f:
+                line = f.read()
+                magnets.append((Path(file).stem, line))
+                os.remove(file)
+    save_hist(magnets)
+    return magnets
+
+def save_hist(magnets):
     # Getting the current date and time
     dt = datetime.now()
     # getting the timestamp
     ts = datetime.timestamp(dt)
-    # iterating over all files
-    for file in file_list:
-        if file.endswith(ext) and os.path.exists(file):
-            print(file)  # print file name
-            with open(file) as f:
-                line = f.read()
-                magnets.append((os.path.basename(file), line))
-                os.remove(file)
 
     # save magnets with timestamp as key
-    shelfFile[str(ts)] = magnets
+    with shelve.open(shelfFilePath) as shelfFile:
+        shelfFile[str(ts)] = magnets
 
+# open all .magnet files in deluge
+def send_to_deluge(magnets):
     # open magnet links in deluge
     for magnet in magnets:
-        subprocess.run(["deluge", magnet[1]])
-
-
-app = QApplication(sys.argv)
-
-window = MainWindow()
-window.show()
-
-# start the event loop
-app.exec()
-
-shelfFile.close()
-
+        subprocess.run(["deluge", magnet])

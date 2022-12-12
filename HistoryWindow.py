@@ -1,19 +1,21 @@
 #! python3
-# history_window.py
+# HistoryWindow.py
 
-from PySide6.QtWidgets import QWidget
+from PySide6.QtWidgets import QWidget, QDialogButtonBox, QAbstractItemView
 from PySide6.QtGui import QStandardItemModel, QStandardItem
 from PySide6.QtCore import Qt
 
 import pyMagSafeGui
-from HistoryWindow import Ui_hist_window
+from UI_HistoryWindow import Ui_hist_window
 
 
 class StandardItem(QStandardItem):
     def __init__(self, txt=""):
         super().__init__()
+        txt = str(txt)
         self.setText(txt)
         self.setEditable(False)
+
 
 class HistoryWindow(QWidget, Ui_hist_window):
     def __init__(self):
@@ -21,8 +23,10 @@ class HistoryWindow(QWidget, Ui_hist_window):
         self.setObjectName("History")
         self.setupUi(self)
 
+        self.main_win = self.parent()
+
         history = pyMagSafeGui.read_hist()
-        model = self.create_hist_model(self)
+        model = self.create_hist_model()
         self.add_hist(model, history)
 
         self.treeView.setModel(model)
@@ -30,8 +34,11 @@ class HistoryWindow(QWidget, Ui_hist_window):
         self.treeView.header().resizeSection(1, 250)
         self.treeView.header().resizeSection(2, 500)
         self.treeView.setSortingEnabled(True)
+        self.treeView.setSelectionMode(QAbstractItemView.MultiSelection)
 
-    def create_hist_model(self, parent):
+        self.buttonBox.button(QDialogButtonBox.Close).clicked.connect(self.close)
+
+    def create_hist_model(self):
         model = QStandardItemModel(0, 3, self)
         model.setHeaderData(0, Qt.Horizontal, "Date")
         model.setHeaderData(1, Qt.Horizontal, "Torrent")

@@ -30,7 +30,7 @@ class Ui_hist_window(object):
         self.buttonBox = QDialogButtonBox(hist_window)
         self.buttonBox.setObjectName(u"buttonBox")
         self.buttonBox.setOrientation(Qt.Horizontal)
-        self.buttonBox.setStandardButtons(QDialogButtonBox.Close|QDialogButtonBox.Retry)
+        self.buttonBox.setStandardButtons(QDialogButtonBox.Close|QDialogButtonBox.Retry|QDialogButtonBox.Reset)
 
         self.verticalLayout.addWidget(self.buttonBox)
 

@@ -3,7 +3,7 @@
 
 from PySide6.QtWidgets import (QMainWindow, QWidget, QPushButton, QStatusBar, QAbstractItemView,
                                QVBoxLayout, QFileDialog, QTreeView, QDialogButtonBox)
-from PySide6.QtGui import QAction, QStandardItemModel
+from PySide6.QtGui import QAction, QStandardItemModel, QCloseEvent
 from PySide6.QtCore import Qt
 import os
 
@@ -128,3 +128,8 @@ class MainWindow(QMainWindow):
             magnets.append(value)
         self.add_mag(magnets)
         self.hist_window.treeView.clearSelection()
+
+    def closeEvent(self, event: QCloseEvent) -> None:
+        # close button clicked in Main window, close his_window too
+        self.hist_window.close()
+        self.hist_window = None

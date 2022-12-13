@@ -38,6 +38,11 @@ class HistoryWindow(QWidget, Ui_hist_window):
 
         self.buttonBox.button(QDialogButtonBox.Close).clicked.connect(self.close)
 
+        self.buttonBox.button(QDialogButtonBox.Retry).setText("Resend")
+
+        self.buttonBox.button(QDialogButtonBox.Reset).clicked.connect(self.treeView.clearSelection)
+        self.buttonBox.button(QDialogButtonBox.Reset).setText("Clear Selection")
+
     def create_hist_model(self):
         model = QStandardItemModel(0, 3, self)
         model.setHeaderData(0, Qt.Horizontal, "Date")

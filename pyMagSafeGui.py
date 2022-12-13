@@ -21,6 +21,7 @@ def read_config():
         config = shelfFile.get(CONFIG_KEY, {})
         return config
 
+
 def save_config(key, value):
     with shelve.open(shelfFilePath) as shelfFile:
         config = shelfFile.get(CONFIG_KEY, {})
@@ -37,21 +38,8 @@ def read_hist():
                 ts = datetime.fromtimestamp(float(item))
                 dt = ts.strftime("%Y-%m-%d %H:%M:%S")
                 history[dt] = shelfFile.get(item)
-    # # user entered "-l" to request list of keys/timestamps
-    # elif sys.argv[1] == "-l":
-    #     keys = list(shelfFile.keys())
-    #     keys.sort()
-    #     max = len(max(keys, key=len))
-    #     for item in keys:
-    #         timestamp = float(item)
-    #         datetime = datetime.fromtimestamp(timestamp)
-    #         print(f'{item :<{max}} : {datetime}')
-    # # user entered a time stamp to request previous magnets
-    # elif sys.argv[1] in list(shelfFile.keys()):
-    #     for item in list(shelfFile.get(sys.argv[1])):
-    #         print(f"{item[0]} :\n{item[1]}")
-    #         print()
     return history
+
 
 def read_magnets(file_list):
     magnets = []
@@ -66,6 +54,7 @@ def read_magnets(file_list):
     save_hist(magnets)
     return magnets
 
+
 def save_hist(magnets):
     # Getting the current date and time
     dt = datetime.now()
@@ -75,6 +64,7 @@ def save_hist(magnets):
     # save magnets with timestamp as key
     with shelve.open(shelfFilePath) as shelfFile:
         shelfFile[str(ts)] = magnets
+
 
 # open all .magnet files in deluge
 def send_to_deluge(magnets):

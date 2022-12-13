@@ -25,10 +25,12 @@ class HistoryWindow(QWidget, Ui_hist_window):
 
         self.main_win = self.parent()
 
+        # retrieve the torrent history and build the model
         history = pyMagSafeGui.read_hist()
         model = self.create_hist_model()
         self.add_hist(model, history)
 
+        # create treeview to hold the torrent history
         self.treeView.setModel(model)
         self.treeView.header().resizeSection(0, 180)
         self.treeView.header().resizeSection(1, 250)
@@ -36,14 +38,22 @@ class HistoryWindow(QWidget, Ui_hist_window):
         self.treeView.setSortingEnabled(True)
         self.treeView.setSelectionMode(QAbstractItemView.MultiSelection)
 
+        # close hist_window button
         self.buttonBox.button(QDialogButtonBox.Close).clicked.connect(self.close)
 
+        # resend selection to main window button
         self.buttonBox.button(QDialogButtonBox.Retry).setText("Resend")
 
+        # clear selection button
         self.buttonBox.button(QDialogButtonBox.Reset).clicked.connect(self.treeView.clearSelection)
         self.buttonBox.button(QDialogButtonBox.Reset).setText("Clear Selection")
 
+        # refresh history button
+        self.buttonBox.button(QDialogButtonBox.RestoreDefaults).clicked.connect(self.refresh_hist)
+        self.buttonBox.button(QDialogButtonBox.RestoreDefaults).setText("Refresh")
+
     def create_hist_model(self):
+        # initialize the model to store the torrent history
         model = QStandardItemModel(0, 3, self)
         model.setHeaderData(0, Qt.Horizontal, "Date")
         model.setHeaderData(1, Qt.Horizontal, "Torrent")
@@ -51,8 +61,17 @@ class HistoryWindow(QWidget, Ui_hist_window):
         return model
 
     def add_hist(self, model, history):
+        # add the history to the model
         hist_keys = history.keys()
         for item in hist_keys:
             torrents = history.get(item)
             for torrent, magnet in torrents:
                 model.appendRow([StandardItem(item), StandardItem(torrent), StandardItem(magnet)])
+
+    def refresh_hist(self):
+        # while self.treeView.model().rowCount() > 0:
+        #     self.treeView.model().removeRow(0)
+        history = pyMagSafeGui.read_hist()
+        model = self.create_hist_model()
+        self.add_hist(model, history)
+        self.treeView.setModel(model)

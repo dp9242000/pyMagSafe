@@ -1,0 +1,7 @@
+.idea/
+HistoryWindow.ui
+__pycache__/
+build/
+dist/
+main.spec
+outFiles/

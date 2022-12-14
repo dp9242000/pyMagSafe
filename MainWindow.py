@@ -2,7 +2,7 @@
 # MainWindow.py
 
 from PySide6.QtWidgets import (QMainWindow, QWidget, QPushButton, QStatusBar, QAbstractItemView,
-                               QVBoxLayout, QFileDialog, QTreeView, QDialogButtonBox)
+                               QVBoxLayout, QFileDialog, QTreeView, QDialogButtonBox, QToolBar)
 from PySide6.QtGui import QAction, QStandardItemModel, QCloseEvent
 from PySide6.QtCore import Qt
 import os
@@ -62,22 +62,23 @@ class MainWindow(QMainWindow):
 
         self.setCentralWidget(window)
 
-        # # initialize toolbar
-        # toolbar = QToolBar("Tools")
-        # # toolbar.toggleViewAction().setEnabled(False)
-        # self.addToolBar(toolbar)
+        # initialize toolbar
+        toolbar = QToolBar("Tools")
+        toolbar.toggleViewAction().setEnabled(False)
+        self.addToolBar(toolbar)
 
         # create history action to use in toolbar and/or menus
         hist_button_action = QAction("&History", self)
         hist_button_action.setStatusTip("View old magnets")
         hist_button_action.triggered.connect(self.hist_button_clicked)
 
+        toolbar.addAction(hist_button_action)
+
         self.setStatusBar(QStatusBar(self))
 
-        self.menu = self.menuBar()
-
-        menu_menu = self.menu.addMenu("&Menu")
-        menu_menu.addAction(hist_button_action)
+        # self.menu = self.menuBar()
+        # menu_menu = self.menu.addMenu("&Menu")
+        # menu_menu.addAction(hist_button_action)
 
     def add_mag(self, magnets):
         # add magnets to the model

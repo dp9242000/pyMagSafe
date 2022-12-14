@@ -11,7 +11,7 @@ import shelve
 import pyMagSafeSQLI
 
 folderName = os.path.join('.', 'outFiles')
-os.makedirs(folderName, exist_ok=True)
+# os.makedirs(folderName, exist_ok=True)
 
 # open shelf file to save and read magnets
 shelfFilePath = os.path.join(folderName, 'pyMagSafe')

@@ -1,11 +1,23 @@
 from PySide6.QtWidgets import QApplication
+
+import pyMagSafeGui
+import pyMagSafeSQLI
 from MainWindow import MainWindow
 import sys
 
-app = QApplication(sys.argv)
+if __name__ == '__main__':
+    app = QApplication(sys.argv)
 
-window = MainWindow()
-window.show()
+    # initialize database
+    conn = pyMagSafeSQLI.create_connection()
+    pyMagSafeSQLI.create_table(conn, pyMagSafeSQLI.sql_create_config_table)
+    pyMagSafeSQLI.create_table(conn, pyMagSafeSQLI.sql_create_magnet_table)
+    pyMagSafeSQLI.create_table(conn, pyMagSafeSQLI.sql_create_torrent_table)
+    pyMagSafeSQLI.migrate_data(conn)
+    pyMagSafeSQLI.close_db(conn)
 
-# start the event loop
-app.exec()
+    window = MainWindow()
+    window.show()
+
+    # start the event loop
+    app.exec()

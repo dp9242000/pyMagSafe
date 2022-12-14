@@ -1,4 +1,5 @@
 PySide6==6.4.1
 PySide6-Addons==6.4.1
 PySide6-Essentials==6.4.1
+pysqlite3-binary==0.4.7.post8
 shiboken6==6.4.1

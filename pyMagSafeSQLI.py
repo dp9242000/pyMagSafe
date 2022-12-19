@@ -1,4 +1,6 @@
 #! python3
+# pyMagSafeSQLI.py
+# SQLite interface for pyMagSafeGui
 
 import pyMagSafeGui
 
@@ -13,6 +15,7 @@ folder_path = os.path.abspath(os.path.join('.', 'sqlite'))
 os.makedirs(folder_path, exist_ok=True)
 db_file_path = os.path.join(folder_path, database)
 
+# sql statements to create tables
 sql_create_torrent_table = """ CREATE TABLE IF NOT EXISTS torrent (
                                     id integer PRIMARY KEY AUTOINCREMENT,
                                     data text NOT NULL,
@@ -38,6 +41,7 @@ sql_create_config_table = """CREATE TABLE IF NOT EXISTS config (
                             );"""
 
 
+# use the supplied file path to connect to the database, creates new if not exist
 def create_connection(db=db_file_path):
     # create a database connection to the SQLite database
     conn = None
@@ -50,6 +54,7 @@ def create_connection(db=db_file_path):
     return conn
 
 
+# close the database connection at conn
 def close_db(conn):
     # closes the database at conn
     if conn:
@@ -59,6 +64,7 @@ def close_db(conn):
             print(e)
 
 
+# at database connection: conn, create table using the provided sql statement
 def create_table(conn, create_table_sql):
     # creates a table using the create_table_sql statement in the database at conn
     try:
@@ -68,6 +74,7 @@ def create_table(conn, create_table_sql):
         print(e)
 
 
+# insert into the torrent table
 def insert_torrent(conn, torrent):
     # insert data into torrent table
     if len(torrent) == 1:
@@ -80,6 +87,7 @@ def insert_torrent(conn, torrent):
     return cur.lastrowid
 
 
+# update into the torrent table
 def update_torrent(conn, torrent_key, torrent):
     # insort or replace data in config table
     sql = f"update torrent set data = {torrent}, update_dt = CURRENT_TIMESTAMP where id = {torrent_key};"
@@ -89,6 +97,7 @@ def update_torrent(conn, torrent_key, torrent):
     return cur.lastrowid
 
 
+# select from the torrent table
 def select_torrent(conn, torrent=None):
     if torrent is None:
         torrent = {}
@@ -105,6 +114,7 @@ def select_torrent(conn, torrent=None):
     return cur.fetchall()
 
 
+# insert into the magnet table
 def insert_magnet(conn, magnet):
     # insert data into magnet table
     if len(magnet) == 2:
@@ -117,6 +127,7 @@ def insert_magnet(conn, magnet):
     return cur.lastrowid
 
 
+# update into the magnet table
 def update_magnet(conn, torrent_key, magnet):
     # insort or replace data in config table
     sql = f"update magnet set data = {magnet}, update_dt = CURRENT_TIMESTAMP where torrent_id = {torrent_key};"
@@ -126,6 +137,7 @@ def update_magnet(conn, torrent_key, magnet):
     return cur.lastrowid
 
 
+# select from the magnet table
 def select_magnet(conn, magnet):
     if magnet.get("id"):
         m = magnet.get("id")
@@ -140,6 +152,7 @@ def select_magnet(conn, magnet):
     return cur.fetchall()
 
 
+# insert into the config table
 def insert_config(conn, config):
     # insert data into config table
     sql = f"INSERT INTO config(name, data) VALUES(\'{config[0]}\', \'{config[1]}\');"
@@ -149,6 +162,7 @@ def insert_config(conn, config):
     return cur.lastrowid
 
 
+# insert or replace into the config table
 def insert_or_replace_config(conn, config):
     # insort or replace data in config table
     if len(config) == 2:
@@ -163,6 +177,7 @@ def insert_or_replace_config(conn, config):
     return cur.lastrowid
 
 
+# select from the config table
 def select_config(conn):
     sql = f"select name, data from config;"
     cur = conn.cursor()
@@ -170,6 +185,8 @@ def select_config(conn):
     return cur.fetchall()
 
 
+# runs a migration to migrate all data from the shelve file into the sqlite database
+# checks if the shelve file exists
 def migrate_data(conn):
     # migrating data from shelve to sqlitedb
     if os.path.exists(pyMagSafeGui.shelfFilePath):

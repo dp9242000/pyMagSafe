@@ -15,8 +15,8 @@ dt = datetime.now()
 # getting the timestamp
 ts = datetime.timestamp(dt)
 
-folderName = os.path.join('.','outFiles')
-os.makedirs(folderName, exist_ok = True)
+folderName = os.path.join('.', 'outFiles')
+os.makedirs(folderName, exist_ok=True)
 magnets = []
 # giving file extension
 ext = '.magnet'
@@ -45,7 +45,7 @@ if len(sys.argv) >= 2:
             print(f"{item[0]} :\n{item[1]}")
             print()
 
-# no argmunets given, open all .magnet files in deluge
+# no arguments given, open all .magnet files in deluge
 else:
     # iterating over all files
     for files in os.listdir(os.path.join('.')):
@@ -58,7 +58,6 @@ else:
 
     # save magnets with timestamp as key
     shelfFile[str(ts)] = magnets
-
 
     # open magnet links in deluge
     for magnet in magnets:

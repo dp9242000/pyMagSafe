@@ -1,6 +1,5 @@
 from PySide6.QtWidgets import QApplication
 
-import pyMagSafeGui
 import pyMagSafeSQLI
 from MainWindow import MainWindow
 import sys

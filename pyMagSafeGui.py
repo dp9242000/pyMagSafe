@@ -12,6 +12,7 @@ import pyMagSafeSQLI
 
 # shelve file to save and read magnets DEPRECATED
 # no longer generates this folder, this is only used to migrate old data to sqlite
+use_shelve = False
 folderName = os.path.join('.', 'outFiles')
 # os.makedirs(folderName, exist_ok=True)
 shelfFilePath = os.path.join(folderName, 'pyMagSafe')
@@ -19,6 +20,8 @@ shelfFilePath = os.path.join(folderName, 'pyMagSafe')
 CONFIG_KEY = "config"
 
 
+# read the configuration saved from previous sessions
+# during migration will open and read the shelve file instead
 def read_config(migrate=False):
     if migrate:
         with shelve.open(shelfFilePath) as shelfFile:
@@ -34,7 +37,8 @@ def read_config(migrate=False):
         return config_dict
 
 
-def save_config(key, value, use_shelve=False):
+# save the configuration to the database
+def save_config(key, value):
     if use_shelve:
         with shelve.open(shelfFilePath) as shelfFile:
             config = shelfFile.get(CONFIG_KEY, {})
@@ -46,6 +50,8 @@ def save_config(key, value, use_shelve=False):
         pyMagSafeSQLI.close_db(conn)
 
 
+# read the previously saved magnets
+# during migration will open and read the shelve file instead
 def read_hist(migrate=False):
     history = {}
     if migrate:
@@ -68,6 +74,7 @@ def read_hist(migrate=False):
     return history
 
 
+# read the magnet links from the files in the provided file_list
 def read_magnets(file_list):
     magnets = []
     # iterating over all files
@@ -82,7 +89,8 @@ def read_magnets(file_list):
     return magnets
 
 
-def save_hist(magnets, use_shelve=False):
+# save the provided magnets to the database
+def save_hist(magnets):
     # Getting the current date and time
     dt = datetime.now()
     # getting the timestamp
@@ -92,7 +100,6 @@ def save_hist(magnets, use_shelve=False):
         with shelve.open(shelfFilePath) as shelfFile:
             shelfFile[str(ts)] = magnets
     else:
-        dt = dt.strftime("%Y-%m-%d %H:%M:%S")
         conn = pyMagSafeSQLI.create_connection()
         for torrent, magnet in magnets:
             torr_key = pyMagSafeSQLI.insert_torrent(conn, (torrent,))

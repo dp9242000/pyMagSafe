@@ -10,10 +10,10 @@ import shelve
 
 import pyMagSafeSQLI
 
+# shelve file to save and read magnets DEPRECATED
+# no longer generates this folder, this is only used to migrate old data to sqlite
 folderName = os.path.join('.', 'outFiles')
 # os.makedirs(folderName, exist_ok=True)
-
-# open shelf file to save and read magnets
 shelfFilePath = os.path.join(folderName, 'pyMagSafe')
 
 CONFIG_KEY = "config"
@@ -98,7 +98,6 @@ def save_hist(magnets, use_shelve=False):
             torr_key = pyMagSafeSQLI.insert_torrent(conn, (torrent,))
             pyMagSafeSQLI.insert_magnet(conn, (magnet, torr_key))
         pyMagSafeSQLI.close_db(conn)
-
 
 
 # open all .magnet files in deluge

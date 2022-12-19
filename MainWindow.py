@@ -172,7 +172,7 @@ class MainWindow(QMainWindow):
         # user clicked the Delete Selection button
         # retrieve selected rows from the list
         indexes = self.fname.selectedIndexes()
-        # initialize set to store the row numbers, set is used to prevent duplicate rows
+        # initialize set to store the row numbers, set is used to prevent duplicate values
         index_rows = set()
         # grab the row numbers
         for index in indexes:

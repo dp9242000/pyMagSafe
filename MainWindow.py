@@ -82,8 +82,8 @@ class MainWindow(QMainWindow):
 
     def add_mag(self, magnets):
         # add magnets to the model
-        for torrent, magnet in magnets:
-            self.model.appendRow([StandardItem(torrent), StandardItem(magnet)])
+        for magnet in magnets:
+            self.model.appendRow([StandardItem(magnet.text), StandardItem(magnet.link)])
 
     def go_button_clicked(self):
         # user clicked the Send to Deluge button

@@ -12,7 +12,6 @@ if __name__ == '__main__':
     pyMagSafeSQLI.create_table(conn, pyMagSafeSQLI.sql_create_config_table)
     pyMagSafeSQLI.create_table(conn, pyMagSafeSQLI.sql_create_magnet_table)
     pyMagSafeSQLI.create_table(conn, pyMagSafeSQLI.sql_create_torrent_table)
-    pyMagSafeSQLI.migrate_data(conn)
     pyMagSafeSQLI.close_db(conn)
 
     window = MainWindow()

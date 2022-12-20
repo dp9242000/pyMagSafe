@@ -4,13 +4,9 @@
 from PySide6.QtWidgets import QWidget, QDialogButtonBox, QAbstractItemView
 from PySide6.QtGui import QStandardItemModel, QStandardItem
 from PySide6.QtCore import Qt
-from PySide6.QtSql import QSqlDatabase, QSqlTableModel
 
 import pyMagSafeGui
 from UI_HistoryWindow import Ui_hist_window
-
-conn = QSqlDatabase.addDatabase("QSQLITE")
-conn.setDatabaseName("sqlite/db.copy")
 
 
 class StandardItem(QStandardItem):
@@ -19,6 +15,12 @@ class StandardItem(QStandardItem):
         txt = str(txt)
         self.setText(txt)
         self.setEditable(False)
+
+
+def add_hist(model, magnets):
+    # add the history to the model
+    for magnet in magnets:
+        model.appendRow([StandardItem(magnet.date), StandardItem(magnet.text), StandardItem(magnet.link)])
 
 
 class HistoryWindow(QWidget, Ui_hist_window):
@@ -32,19 +34,15 @@ class HistoryWindow(QWidget, Ui_hist_window):
         # retrieve the torrent history and build the model
         history = pyMagSafeGui.read_hist()
         model = self.create_hist_model()
-        # self.add_hist(model, history)
+        add_hist(model, history)
 
         # create treeview to hold the torrent history
         self.treeView.setModel(model)
-        # self.treeView.header().resizeSection(0, 180)
-        # self.treeView.header().resizeSection(1, 250)
+        self.treeView.header().resizeSection(0, 180)
+        self.treeView.header().resizeSection(1, 250)
         self.treeView.header().resizeSection(2, 500)
         self.treeView.setSortingEnabled(True)
         self.treeView.setSelectionMode(QAbstractItemView.MultiSelection)
-        self.treeView.resizeColumnToContents(0)
-        self.treeView.resizeColumnToContents(1)
-        self.treeView.resizeColumnToContents(3)
-        self.treeView.resizeColumnToContents(4)
 
         # close hist_window button
         self.buttonBox.button(QDialogButtonBox.Close).clicked.connect(self.close)
@@ -62,25 +60,16 @@ class HistoryWindow(QWidget, Ui_hist_window):
 
     def create_hist_model(self):
         # initialize the model to store the torrent history
-        # model = QStandardItemModel(0, 3, self)
-        model = QSqlTableModel(self)
-        model.setTable("torrent_magnet")
-        model.setHeaderData(0, Qt.Horizontal, "ID")
+        model = QStandardItemModel(0, 3, self)
+        model.setHeaderData(0, Qt.Horizontal, "Date")
         model.setHeaderData(1, Qt.Horizontal, "Torrent")
         model.setHeaderData(2, Qt.Horizontal, "Magnet")
-        model.setHeaderData(3, Qt.Horizontal, "Create_DT")
-        model.setHeaderData(4, Qt.Horizontal, "Update_DT")
         return model
-
-    def add_hist(self, model, magnets):
-        # add the history to the model
-        for magnet in magnets:
-            model.appendRow([StandardItem(magnet.date), StandardItem(magnet.text), StandardItem(magnet.link)])
 
     def refresh_hist(self):
         # while self.treeView.model().rowCount() > 0:
         #     self.treeView.model().removeRow(0)
         history = pyMagSafeGui.read_hist()
         model = self.create_hist_model()
-        self.add_hist(model, history)
+        add_hist(model, history)
         self.treeView.setModel(model)

@@ -17,6 +17,12 @@ class StandardItem(QStandardItem):
         self.setEditable(False)
 
 
+def add_hist(model, magnets):
+    # add the history to the model
+    for magnet in magnets:
+        model.appendRow([StandardItem(magnet.date), StandardItem(magnet.text), StandardItem(magnet.link)])
+
+
 class HistoryWindow(QWidget, Ui_hist_window):
     def __init__(self):
         super().__init__()
@@ -28,7 +34,7 @@ class HistoryWindow(QWidget, Ui_hist_window):
         # retrieve the torrent history and build the model
         history = pyMagSafeGui.read_hist()
         model = self.create_hist_model()
-        self.add_hist(model, history)
+        add_hist(model, history)
 
         # create treeview to hold the torrent history
         self.treeView.setModel(model)
@@ -60,15 +66,10 @@ class HistoryWindow(QWidget, Ui_hist_window):
         model.setHeaderData(2, Qt.Horizontal, "Magnet")
         return model
 
-    def add_hist(self, model, magnets):
-        # add the history to the model
-        for magnet in magnets:
-            model.appendRow([StandardItem(magnet.date), StandardItem(magnet.text), StandardItem(magnet.link)])
-
     def refresh_hist(self):
         # while self.treeView.model().rowCount() > 0:
         #     self.treeView.model().removeRow(0)
         history = pyMagSafeGui.read_hist()
         model = self.create_hist_model()
-        self.add_hist(model, history)
+        add_hist(model, history)
         self.treeView.setModel(model)

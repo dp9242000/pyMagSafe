@@ -185,24 +185,3 @@ def select_config(conn):
     cur = conn.cursor()
     cur.execute(sql)
     return cur.fetchall()
-
-
-# runs a migration to migrate all data from the shelve file into the sqlite database
-# checks if the shelve file exists
-def migrate_data(conn):
-    # migrating data from shelve to sqlitedb
-    if os.path.exists(pyMagSafeGui.shelfFilePath):
-        print('Shelve file detected. Migrating database')
-        config = pyMagSafeGui.read_config(migrate=True)
-        history = pyMagSafeGui.read_hist(migrate=True)
-        config_keys = config.keys()
-        for key in config_keys:
-            conf = config.get(key)
-            insert_or_replace_config(conn, (key, conf))
-        hist_keys = history.keys()
-        for key in hist_keys:
-            hist = history.get(key)
-            for torrent, magnet in hist:
-                torr_id = insert_torrent(conn, (torrent, key))
-                insert_magnet(conn, (magnet, torr_id, key))
-        print('Migration complete')

@@ -60,13 +60,10 @@ class HistoryWindow(QWidget, Ui_hist_window):
         model.setHeaderData(2, Qt.Horizontal, "Magnet")
         return model
 
-    def add_hist(self, model, history):
+    def add_hist(self, model, magnets):
         # add the history to the model
-        hist_keys = history.keys()
-        for item in hist_keys:
-            torrents = history.get(item)
-            for torrent, magnet in torrents:
-                model.appendRow([StandardItem(item), StandardItem(torrent), StandardItem(magnet)])
+        for magnet in magnets:
+            model.appendRow([StandardItem(magnet.date), StandardItem(magnet.text), StandardItem(magnet.link)])
 
     def refresh_hist(self):
         # while self.treeView.model().rowCount() > 0:

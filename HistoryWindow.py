@@ -4,7 +4,7 @@
 from PySide6.QtWidgets import QWidget, QDialogButtonBox, QAbstractItemView
 from PySide6.QtGui import QStandardItem
 from PySide6.QtCore import Qt
-from PySide6.QtSql import QSqlDatabase, QSqlTableModel
+from PySide6.QtSql import QSqlTableModel
 
 import pyMagSafeSQLI
 from UI_HistoryWindow import Ui_hist_window

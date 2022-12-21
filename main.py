@@ -1,3 +1,6 @@
+#! python3
+# main.py
+
 from PySide6.QtWidgets import QApplication
 
 from MainWindow import MainWindow

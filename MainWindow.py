@@ -152,10 +152,12 @@ class MainWindow(QMainWindow):
         # iterate through the rows and retrieve the torrent name and magnet
         for index in index_rows:
             torrent = self.hist_window.treeView.model().index(index, 1)
-            torrent = torrent.model().itemFromIndex(torrent).text()
+            torrent = torrent.data()
             magnet = self.hist_window.treeView.model().index(index, 2)
-            magnet = magnet.model().itemFromIndex(magnet).text()
-            value = (torrent, magnet)
+            magnet = magnet.data()
+            dt = self.hist_window.treeView.model().index(index, 3)
+            dt = dt.data()
+            value = pyMagSafeGui.Magnet(torrent, magnet, dt)
             magnets.append(value)
         # add the magnets to the QTreeView self.fname
         self.add_mag(magnets)

@@ -2,11 +2,14 @@
 # HistoryWindow.py
 
 from PySide6.QtWidgets import QWidget, QDialogButtonBox, QAbstractItemView
-from PySide6.QtGui import QStandardItemModel, QStandardItem
+from PySide6.QtGui import QStandardItem
 from PySide6.QtCore import Qt
+from PySide6.QtSql import QSqlDatabase, QSqlTableModel
 
-import pyMagSafeGui
+import pyMagSafeSQLI
 from UI_HistoryWindow import Ui_hist_window
+
+conn = pyMagSafeSQLI.conn
 
 
 class StandardItem(QStandardItem):
@@ -17,12 +20,6 @@ class StandardItem(QStandardItem):
         self.setEditable(False)
 
 
-def add_hist(model, magnets):
-    # add the history to the model
-    for magnet in magnets:
-        model.appendRow([StandardItem(magnet.date), StandardItem(magnet.text), StandardItem(magnet.link)])
-
-
 class HistoryWindow(QWidget, Ui_hist_window):
     def __init__(self):
         super().__init__()
@@ -31,18 +28,18 @@ class HistoryWindow(QWidget, Ui_hist_window):
 
         self.main_win = self.parent()
 
-        # retrieve the torrent history and build the model
-        history = pyMagSafeGui.read_hist()
+        # create the history model
         model = self.create_hist_model()
-        add_hist(model, history)
 
         # create treeview to hold the torrent history
         self.treeView.setModel(model)
-        self.treeView.header().resizeSection(0, 180)
-        self.treeView.header().resizeSection(1, 250)
-        self.treeView.header().resizeSection(2, 500)
         self.treeView.setSortingEnabled(True)
         self.treeView.setSelectionMode(QAbstractItemView.MultiSelection)
+        self.treeView.resizeColumnToContents(0)
+        self.treeView.header().resizeSection(2, 500)
+        self.treeView.resizeColumnToContents(1)
+        self.treeView.resizeColumnToContents(3)
+        self.treeView.resizeColumnToContents(4)
 
         # close hist_window button
         self.buttonBox.button(QDialogButtonBox.Close).clicked.connect(self.close)
@@ -54,22 +51,21 @@ class HistoryWindow(QWidget, Ui_hist_window):
         self.buttonBox.button(QDialogButtonBox.Reset).clicked.connect(self.treeView.clearSelection)
         self.buttonBox.button(QDialogButtonBox.Reset).setText("Clear Selection")
 
-        # refresh history button
+        # refresh button
         self.buttonBox.button(QDialogButtonBox.RestoreDefaults).clicked.connect(self.refresh_hist)
         self.buttonBox.button(QDialogButtonBox.RestoreDefaults).setText("Refresh")
 
     def create_hist_model(self):
         # initialize the model to store the torrent history
-        model = QStandardItemModel(0, 3, self)
-        model.setHeaderData(0, Qt.Horizontal, "Date")
+        model = QSqlTableModel(self)
+        model.setTable("torrent_magnet")
+        model.setHeaderData(0, Qt.Horizontal, "ID")
         model.setHeaderData(1, Qt.Horizontal, "Torrent")
         model.setHeaderData(2, Qt.Horizontal, "Magnet")
+        model.setHeaderData(3, Qt.Horizontal, "Create_DT")
+        model.setHeaderData(4, Qt.Horizontal, "Update_DT")
         return model
 
     def refresh_hist(self):
-        # while self.treeView.model().rowCount() > 0:
-        #     self.treeView.model().removeRow(0)
-        history = pyMagSafeGui.read_hist()
         model = self.create_hist_model()
-        add_hist(model, history)
         self.treeView.setModel(model)

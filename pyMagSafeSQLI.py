@@ -2,12 +2,14 @@
 # pyMagSafeSQLI.py
 # SQLite interface for pyMagSafeGui
 
-import pyMagSafeGui
+import logging
 
-from pysqlite3 import dbapi2 as sqlite3
-from pysqlite3 import Error
+from PySide6.QtSql import QSqlDatabase, QSqlQuery
 
 import os
+
+logging.basicConfig(level=logging.ERROR)
+
 
 # first create db folder if it doesn't exist
 database = "db"
@@ -15,21 +17,16 @@ folder_path = os.path.abspath(os.path.join('.', 'sqlite'))
 os.makedirs(folder_path, exist_ok=True)
 db_file_path = os.path.join(folder_path, database)
 
-# sql statements to create tables
-sql_create_torrent_table = """ CREATE TABLE IF NOT EXISTS torrent (
-                                    id integer PRIMARY KEY AUTOINCREMENT,
-                                    data text NOT NULL,
-                                    create_dt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                                    update_dt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-                                ); """
+conn = QSqlDatabase.addDatabase("QSQLITE")
+conn.setDatabaseName(db_file_path)
 
-sql_create_magnet_table = """CREATE TABLE IF NOT EXISTS magnet (
+# sql statements to create tables
+sql_create_torrent_magnet_table = """CREATE TABLE IF NOT EXISTS torrent_magnet (
                                 id integer PRIMARY KEY AUTOINCREMENT,
-                                data text NOT NULL,
-                                torrent_id integer NOT NULL,
+                                torrent text NOT NULL,
+                                magnet text NOT NULL,
                                 create_dt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                                update_dt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                                FOREIGN KEY (torrent_id) REFERENCES torrent (id)
+                                update_dt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                             );"""
 
 sql_create_config_table = """CREATE TABLE IF NOT EXISTS config (
@@ -41,129 +38,67 @@ sql_create_config_table = """CREATE TABLE IF NOT EXISTS config (
                             );"""
 
 
-def create_connection(db=db_file_path):
-    # use the supplied file path to connect to the database
-    # creates new if not exist
-    # create a database connection to the SQLite database
-    conn = None
-    try:
-        conn = sqlite3.connect(db)
-        # print(sqlite3.version)
-    except Error as e:
-        print(e)
-
-    return conn
-
-
-def close_db(conn):
-    # close the database connection at conn
-    # closes the database at conn
-    if conn:
-        try:
-            conn.close()
-        except Error as e:
-            print(e)
-
-
-def create_table(conn, create_table_sql):
+def create_table(create_table_sql):
     # at database connection: conn, create table using the provided sql statement
     # creates a table using the create_table_sql statement in the database at conn
-    try:
-        c = conn.cursor()
-        c.execute(create_table_sql)
-    except Error as e:
-        print(e)
+    logging.info(f"Creating table")
+    logging.debug(f"{create_table_sql}")
+    conn.open()
+    query = QSqlQuery()
+    query.exec(create_table_sql)
+    conn.close()
 
 
-def insert_torrent(conn, torrent):
-    # insert into the torrent table
-    # insert data into torrent table
-    if len(torrent) == 1:
-        sql = f"INSERT INTO torrent(data) VALUES(\'{torrent[0]}\');"
+def insert_torrent_magnet(data):
+    # insert data into torrent_magnet table
+    if len(data) == 2:
+        sql = f"INSERT INTO torrent_magnet(torrent, magnet) VALUES(\'{data[0]}\', \'{data[1]}\');"
     else:
-        sql = f"INSERT INTO torrent(data, create_dt) VALUES(\'{torrent[0]}\', \'{torrent[1]}\');"
-    cur = conn.cursor()
-    cur.execute(sql)
-    conn.commit()
-    return cur.lastrowid
+        sql = f"""INSERT INTO torrent_magnet(torrent, magnet, create_dt) 
+        VALUES(\'{data[0]}\', \'{data[1]}\', \'{data[2]}\');"""
+    logging.info(f"inserting into torrent_magnet table")
+    logging.debug(f"{sql}")
+    conn.open()
+    query = QSqlQuery()
+    query.exec(sql)
+    conn.close()
 
 
-def update_torrent(conn, torrent_key, torrent):
-    # update into the torrent table
-    # insort or replace data in config table
-    sql = f"update torrent set data = {torrent}, update_dt = CURRENT_TIMESTAMP where id = {torrent_key};"
-    cur = conn.cursor()
-    cur.execute(sql)
-    conn.commit()
-    return cur.lastrowid
-
-
-def select_torrent(conn, torrent=None):
+def select_torrent_magnet(torrent=None):
     # select from the torrent table
+    tor_mag = []
     if torrent is None:
         torrent = {}
     if torrent.get("id"):
         t = torrent.get("id")
-        sql = f"select id, data, datetime(create_dt, \'localtime\') from torrent where id={t};"
-    elif torrent.get("data"):
-        t = torrent.get("data")
-        sql = f"select id, data, datetime(create_dt, \'localtime\') from torrent where data={t};"
+        sql = f"select id, torrent, magnet, datetime(create_dt, \'localtime\') from torrent_magnet where id={t};"
     else:
-        sql = f"select id, data, datetime(create_dt, \'localtime\') from torrent;"
-    cur = conn.cursor()
-    cur.execute(sql)
-    return cur.fetchall()
+        sql = f"select id, torrent, magnet, datetime(create_dt, \'localtime\') from torrent_magnet;"
+    logging.info(f"selecting from torrent_magnet table")
+    logging.debug(f"{sql}")
+    conn.open()
+    query = QSqlQuery()
+    query.exec(sql)
+    # tor_mag.append((query.value(1), query.value(2), query.value(3)))
+    while query.next():
+        tor_mag.append((query.value(1), query.value(2), query.value(3)))
+    conn.close()
+    return tor_mag
 
 
-def insert_magnet(conn, magnet):
-    # insert into the magnet table
-    # insert data into magnet table
-    if len(magnet) == 2:
-        sql = f"INSERT INTO magnet(data, torrent_id) VALUES(\'{magnet[0]}\', \'{magnet[1]}\');"
-    else:
-        sql = f"INSERT INTO magnet(data, torrent_id, create_dt) VALUES(\'{magnet[0]}\', \'{magnet[1]}\', \'{magnet[2]}\');"
-    cur = conn.cursor()
-    cur.execute(sql)
-    conn.commit()
-    return cur.lastrowid
-
-
-def update_magnet(conn, torrent_key, magnet):
-    # update into the magnet table
-    # insort or replace data in config table
-    sql = f"update magnet set data = {magnet}, update_dt = CURRENT_TIMESTAMP where torrent_id = {torrent_key};"
-    cur = conn.cursor()
-    cur.execute(sql)
-    conn.commit()
-    return cur.lastrowid
-
-
-def select_magnet(conn, magnet):
-    # select from the magnet table
-    if magnet.get("id"):
-        m = magnet.get("id")
-        sql = f"select data from magnet where id={m};"
-    elif magnet.get("torrent_id"):
-        m = magnet.get("torrent_id")
-        sql = f"select data from magnet where torrent_id={m};"
-    else:
-        sql = "select data from magnet;"
-    cur = conn.cursor()
-    cur.execute(sql)
-    return cur.fetchall()
-
-
-def insert_config(conn, config):
+def insert_config(config):
     # insert into the config table
     # insert data into config table
     sql = f"INSERT INTO config(name, data) VALUES(\'{config[0]}\', \'{config[1]}\');"
-    cur = conn.cursor()
-    cur.execute(sql)
-    conn.commit()
-    return cur.lastrowid
+    logging.info(f"inserting into config table")
+    logging.debug(f"{sql}")
+    conn.open()
+    query = QSqlQuery()
+    query.exec(sql)
+    conn.close()
 
 
-def insert_or_replace_config(conn, config):
+def insert_or_replace_config(config):
     # insert or replace into the config table
     # insort or replace data in config table
     if len(config) == 2:
@@ -172,15 +107,26 @@ def insert_or_replace_config(conn, config):
     else:
         sql = f"""insert or replace into config (id, name, data, create_dt) values ((select id from config where name =
          \'{config[0]}\'), \'{config[0]}\', \'{config[1]}\', \'{config[2]}\');"""
-    cur = conn.cursor()
-    cur.execute(sql)
-    conn.commit()
-    return cur.lastrowid
+    logging.info(f"insert or replace into config table")
+    logging.debug(f"{sql}")
+    conn.open()
+    query = QSqlQuery()
+    query.exec(sql)
+    conn.close()
 
 
-def select_config(conn):
+def select_config():
     # select from the config table
+    config = []
     sql = f"select name, data from config;"
-    cur = conn.cursor()
-    cur.execute(sql)
-    return cur.fetchall()
+    logging.info(f"select from config table")
+    logging.debug(f"{sql}")
+    conn.open()
+    query = QSqlQuery()
+    query.exec(sql)
+    conn.close()
+    # config.append((query.value(0), query.value(1)))
+    while query.next():
+        config.append((query.value(0), query.value(1)))
+    conn.close()
+    return config

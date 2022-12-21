@@ -41,8 +41,9 @@ sql_create_config_table = """CREATE TABLE IF NOT EXISTS config (
                             );"""
 
 
-# use the supplied file path to connect to the database, creates new if not exist
 def create_connection(db=db_file_path):
+    # use the supplied file path to connect to the database
+    # creates new if not exist
     # create a database connection to the SQLite database
     conn = None
     try:
@@ -54,8 +55,8 @@ def create_connection(db=db_file_path):
     return conn
 
 
-# close the database connection at conn
 def close_db(conn):
+    # close the database connection at conn
     # closes the database at conn
     if conn:
         try:
@@ -64,8 +65,8 @@ def close_db(conn):
             print(e)
 
 
-# at database connection: conn, create table using the provided sql statement
 def create_table(conn, create_table_sql):
+    # at database connection: conn, create table using the provided sql statement
     # creates a table using the create_table_sql statement in the database at conn
     try:
         c = conn.cursor()
@@ -74,8 +75,8 @@ def create_table(conn, create_table_sql):
         print(e)
 
 
-# insert into the torrent table
 def insert_torrent(conn, torrent):
+    # insert into the torrent table
     # insert data into torrent table
     if len(torrent) == 1:
         sql = f"INSERT INTO torrent(data) VALUES(\'{torrent[0]}\');"
@@ -87,8 +88,8 @@ def insert_torrent(conn, torrent):
     return cur.lastrowid
 
 
-# update into the torrent table
 def update_torrent(conn, torrent_key, torrent):
+    # update into the torrent table
     # insort or replace data in config table
     sql = f"update torrent set data = {torrent}, update_dt = CURRENT_TIMESTAMP where id = {torrent_key};"
     cur = conn.cursor()
@@ -97,8 +98,8 @@ def update_torrent(conn, torrent_key, torrent):
     return cur.lastrowid
 
 
-# select from the torrent table
 def select_torrent(conn, torrent=None):
+    # select from the torrent table
     if torrent is None:
         torrent = {}
     if torrent.get("id"):
@@ -114,8 +115,8 @@ def select_torrent(conn, torrent=None):
     return cur.fetchall()
 
 
-# insert into the magnet table
 def insert_magnet(conn, magnet):
+    # insert into the magnet table
     # insert data into magnet table
     if len(magnet) == 2:
         sql = f"INSERT INTO magnet(data, torrent_id) VALUES(\'{magnet[0]}\', \'{magnet[1]}\');"
@@ -127,8 +128,8 @@ def insert_magnet(conn, magnet):
     return cur.lastrowid
 
 
-# update into the magnet table
 def update_magnet(conn, torrent_key, magnet):
+    # update into the magnet table
     # insort or replace data in config table
     sql = f"update magnet set data = {magnet}, update_dt = CURRENT_TIMESTAMP where torrent_id = {torrent_key};"
     cur = conn.cursor()
@@ -137,8 +138,8 @@ def update_magnet(conn, torrent_key, magnet):
     return cur.lastrowid
 
 
-# select from the magnet table
 def select_magnet(conn, magnet):
+    # select from the magnet table
     if magnet.get("id"):
         m = magnet.get("id")
         sql = f"select data from magnet where id={m};"
@@ -152,8 +153,8 @@ def select_magnet(conn, magnet):
     return cur.fetchall()
 
 
-# insert into the config table
 def insert_config(conn, config):
+    # insert into the config table
     # insert data into config table
     sql = f"INSERT INTO config(name, data) VALUES(\'{config[0]}\', \'{config[1]}\');"
     cur = conn.cursor()
@@ -162,8 +163,8 @@ def insert_config(conn, config):
     return cur.lastrowid
 
 
-# insert or replace into the config table
 def insert_or_replace_config(conn, config):
+    # insert or replace into the config table
     # insort or replace data in config table
     if len(config) == 2:
         sql = f"""insert or replace into config (id, name, data) values ((select id from config where name = 
@@ -177,8 +178,8 @@ def insert_or_replace_config(conn, config):
     return cur.lastrowid
 
 
-# select from the config table
 def select_config(conn):
+    # select from the config table
     sql = f"select name, data from config;"
     cur = conn.cursor()
     cur.execute(sql)

@@ -152,13 +152,11 @@ def insert_config(conn, config):
 def insert_or_replace_config(conn, config):
     # insort or replace data in config table
     if len(config) == 2:
-        sql = f"insert or replace into config (id, name, data) values (" \
-              f"(select id from config where name = \'{config[0]}\'), \'{config[0]}\'," \
-              f" \'{config[1]}\');"
+        sql = f"""insert or replace into config (id, name, data) values ((select id from config where name = 
+        \'{config[0]}\'), \'{config[0]}\', \'{config[1]}\');"""
     else:
-        sql = f"insert or replace into config (id, name, data, create_dt) values (" \
-              f"(select id from config where name = \'{config[0]}\'), \'{config[0]}\'," \
-              f" \'{config[1]}\', \'{config[2]}\');"
+        sql = f"""insert or replace into config (id, name, data, create_dt) values ((select id from config where name =
+         \'{config[0]}\'), \'{config[0]}\', \'{config[1]}\', \'{config[2]}\');"""
     cur = conn.cursor()
     cur.execute(sql)
     conn.commit()

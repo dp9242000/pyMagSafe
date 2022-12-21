@@ -9,6 +9,9 @@ from pathlib import Path
 
 import pyMagSafeSQLI
 
+# initialize database
+pyMagSafeSQLI.create_table(pyMagSafeSQLI.sql_create_config_table)
+pyMagSafeSQLI.create_table(pyMagSafeSQLI.sql_create_torrent_magnet_table)
 
 def read_config():
     # read the configuration saved from previous sessions

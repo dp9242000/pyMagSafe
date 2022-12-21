@@ -13,6 +13,7 @@ import pyMagSafeSQLI
 pyMagSafeSQLI.create_table(pyMagSafeSQLI.sql_create_config_table)
 pyMagSafeSQLI.create_table(pyMagSafeSQLI.sql_create_torrent_magnet_table)
 
+
 def read_config():
     # read the configuration saved from previous sessions
     # during migration will open and read the shelve file instead
@@ -28,13 +29,16 @@ def save_config(key, value):
     pyMagSafeSQLI.insert_or_replace_config((key, value))
 
 
-def read_hist():
+def read_hist(torrent=None):
     # read the previously saved magnets
     # during migration will open and read the shelve file instead
     magnets = []
-    history = pyMagSafeSQLI.select_torrent_magnet()
-    for torrent, magnet, date in history:
-        magnets.append(Magnet(torrent, magnet, date))
+    if torrent:
+        history = pyMagSafeSQLI.select_torrent_magnet(torrent)
+    else:
+        history = pyMagSafeSQLI.select_torrent_magnet()
+    for key, torrent, magnet, date in history:
+        magnets.append(Magnet(torrent, magnet, date, key))
     return magnets
 
 
@@ -64,15 +68,16 @@ def send_to_deluge(magnets):
     # open all .magnet files in deluge
     # open magnet links in deluge
     for magnet in magnets:
-        subprocess.run(["deluge", magnet])
+        subprocess.Popen(["deluge", str(magnet)], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
 
 class Magnet:
     # object to hold magnets
-    def __init__(self, text, link, date=None):
+    def __init__(self, text, link, date=None, id=None):
         self.text = text
         self.link = link
         self.date = date
+        self.id = id
 
     def __str__(self):
-        return self.text
+        return self.link

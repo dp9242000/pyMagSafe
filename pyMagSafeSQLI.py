@@ -81,7 +81,7 @@ def select_torrent_magnet(torrent=None):
     query.exec(sql)
     # tor_mag.append((query.value(1), query.value(2), query.value(3)))
     while query.next():
-        tor_mag.append((query.value(1), query.value(2), query.value(3)))
+        tor_mag.append((query.value(0), query.value(1), query.value(2), query.value(3)))
     conn.close()
     return tor_mag
 

@@ -8,8 +8,6 @@ import sys
 
 import pyMagSafeGui
 
-magnets = []
-
 
 def absolute_file_paths(directory):
     file_paths = []

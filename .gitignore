@@ -7,4 +7,4 @@ main.spec
 outFiles/
 sqlite/
 /magnets.db
-HistoryWindow.ui
+MainWindow.ui

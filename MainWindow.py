@@ -2,15 +2,14 @@
 # MainWindow.py
 
 from PySide6.QtWidgets import (QMainWindow, QStatusBar, QAbstractItemView, QFileDialog, QDialogButtonBox, QToolBar)
-from PySide6.QtGui import QAction, QStandardItemModel, QCloseEvent
-from PySide6.QtCore import Qt, QItemSelection
+from PySide6.QtGui import QAction, QStandardItemModel, QCloseEvent, QStandardItem
+from PySide6.QtCore import Qt
 from PySide6 import QtCore
 from PySide6.QtSql import QSqlTableModel
 
 import os
 
 import pyMagSafeGui
-from HistoryWindow import StandardItem
 from UI_MainWindow import Ui_main_window
 
 
@@ -19,6 +18,14 @@ def set_title(window, title, count=0):
         window.setWindowTitle(f"{title} ({count})")
     else:
         window.setWindowTitle(f"{title}")
+
+
+class StandardItem(QStandardItem):
+    def __init__(self, txt=""):
+        super().__init__()
+        txt = str(txt)
+        self.setText(txt)
+        self.setEditable(False)
 
 
 class MainWindow(QMainWindow, Ui_main_window):

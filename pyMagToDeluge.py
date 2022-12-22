@@ -25,7 +25,7 @@ if sys.argv[1] == "-h":  # print usage
 elif sys.argv[1] == "-l":  # user entered "-l" to request list of keys/timestamps
     magnets = pyMagSafeGui.read_hist()
     for magnet in magnets:
-        print(f"{magnet.id} - {magnet.text}")
+        print(f"{magnet.key} - {magnet.text}")
 
 elif sys.argv[1] == "-k" and sys.argv[2]:
     print(f"resending torrent id: {sys.argv[2]}")

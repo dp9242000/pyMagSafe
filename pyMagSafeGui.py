@@ -73,11 +73,11 @@ def send_to_deluge(magnets):
 
 class Magnet:
     # object to hold magnets
-    def __init__(self, text, link, date=None, id=None):
+    def __init__(self, text, link, date=None, key=None):
         self.text = text
         self.link = link
         self.date = date
-        self.id = id
+        self.key = key
 
     def __str__(self):
         return self.link

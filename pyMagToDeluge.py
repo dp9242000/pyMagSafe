@@ -1,7 +1,8 @@
 #! python3
 # pyMagToDeluge.py
 # usage: python3 pyMagToDeluge.py <path> <-h> <-l> <-k id>
-# if no options provided, pyMagToDeluge.py will read all .magnet files in the same directory and send them to deluge
+# if no other options provided, pyMagToDeluge.py will read all .magnet files in the <path> directory
+# and send them to deluge
 
 import os
 import sys
@@ -42,3 +43,5 @@ else:  # no arguments given, open all .magnet files in deluge
             print(f"sending: {magnet.text}")
         # open magnet links in deluge
         pyMagSafeGui.send_to_deluge(magnets)
+    else:
+        print(f"{path} is not a valid directory")

@@ -13,7 +13,8 @@ logging.basicConfig(level=logging.ERROR)
 
 # first create db folder if it doesn't exist
 database = "db"
-folder_path = os.path.abspath(os.path.join('.', 'sqlite'))
+folder_path = "~/.config/pyMagSafe/sqlite"
+folder_path = os.path.expanduser(folder_path)
 os.makedirs(folder_path, exist_ok=True)
 db_file_path = os.path.join(folder_path, database)
 

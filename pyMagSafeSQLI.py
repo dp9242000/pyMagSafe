@@ -117,17 +117,16 @@ def insert_or_replace_config(config):
 
 
 def select_config():
-    # select from the config table
-    config = []
+    # select from the config table, returns a dictionary with name as key, and data as value
+    config = {}
     sql = f"select name, data from config;"
-    logging.info(f"select from config table")
+    logging.info(f"select config data from config table")
     logging.debug(f"{sql}")
     conn.open()
     query = QSqlQuery()
     query.exec(sql)
     conn.close()
-    # config.append((query.value(0), query.value(1)))
     while query.next():
-        config.append((query.value(0), query.value(1)))
+        config[query.value(0)] = query.value(1)
     conn.close()
     return config

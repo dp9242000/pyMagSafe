@@ -16,12 +16,7 @@ pyMagSafeSQLI.create_table(pyMagSafeSQLI.sql_create_torrent_magnet_table)
 
 def read_config():
     # read the configuration saved from previous sessions
-    # during migration will open and read the shelve file instead
-    config = pyMagSafeSQLI.select_config()
-    config_dict = {}
-    for key, value in config:
-        config_dict[key] = value
-    return config_dict
+    return pyMagSafeSQLI.select_config()
 
 
 def save_config(key, value):
